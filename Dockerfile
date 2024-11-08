@@ -6,8 +6,6 @@ COPY requirements.txt ./
 
 RUN pip install -r requirements.txt
 
-ENV TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-
 COPY src /app
 
 EXPOSE 8080

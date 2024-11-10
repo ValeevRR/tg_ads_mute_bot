@@ -7,7 +7,7 @@ DB = "mute_users.db"
 def create_db():
     with sqlite3.connect(DB) as con:
         cur = con.cursor()
-        with open("./src/init.sql", "r") as sql_file:
+        with open("init.sql", "r") as sql_file:
             init_script = sql_file.read()
         cur.executescript(init_script)
         logging.info("Database created.")

@@ -4,10 +4,16 @@ import os
 
 from db import (
     create_db,
-    mute_user_db,
-    unmute_user_db,
     is_muted_user,
-    get_chat_mutes
+)
+from src.const import REQUEST_USERNAME
+from src.helpers import (
+    mute_user,
+    unmute_user,
+    is_allowed_message,
+    get_chat_mutes_message,
+    add_allowed_substr,
+    remove_allowed_substr
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -20,40 +26,47 @@ bot = telebot.TeleBot(API_TOKEN)
 create_db()
 
 
-def mute_user(message):
-    chat_id = message.chat.id
-    username = message.text
-    mute_user_db(chat_id, username)
+def request_allowed_substr(message, callback):
+    request_message = bot.send_message(message.chat.id, 'Введите подстроку:')
+    bot.register_next_step_handler(request_message, callback, message.text)
 
 
-def unmute_user(message):
-    chat_id = message.chat.id
-    username = message.text
-    unmute_user_db(chat_id, username)
-
-
-@bot.message_handler(content_types=['photo'])
-def group_chat_photo_handler(message):
-    if is_muted_user(message.chat.id, message.from_user.username):
-        bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-
-
-@bot.message_handler(commands=["mute"])
+@bot.message_handler(commands=["mute_test"])
 def mute_user_handler(message):
-    message = bot.send_message(message.chat.id, 'Введите username')
+    message = bot.send_message(message.chat.id, REQUEST_USERNAME)
     bot.register_next_step_handler(message, mute_user)
 
 
 @bot.message_handler(commands=["unmute"])
 def unmute_user_handler(message):
-    message = bot.send_message(message.chat.id, 'Введите username')
+    message = bot.send_message(message.chat.id, REQUEST_USERNAME)
     bot.register_next_step_handler(message, unmute_user)
+
+
+@bot.message_handler(commands=["add_allowed_substr"])
+def allow_substr_handler(message):
+    request_message = bot.send_message(message.chat.id, REQUEST_USERNAME)
+    bot.register_next_step_handler(request_message, request_allowed_substr, add_allowed_substr)
+
+
+@bot.message_handler(commands=["remove_allowed_substr"])
+def unallow_substr_handler(message):
+    request_message = bot.send_message(message.chat.id, REQUEST_USERNAME)
+    bot.register_next_step_handler(request_message, request_allowed_substr, remove_allowed_substr)
 
 
 @bot.message_handler(commands=["mutes"])
 def chat_mutes_handler(message):
-    mutes = get_chat_mutes(message.chat.id)
-    bot.send_message(message.chat.id, f"Заблокированные:\n{', '.join(mutes)}")
+    mutes_message = get_chat_mutes_message(message.chat.id)
+    bot.send_message(message.chat.id, mutes_message)
+
+
+@bot.message_handler()
+def message_handler(message):
+    if is_muted_user(message.chat.id, message.from_user.username) and not (
+        is_allowed_message(message.text, message.from_user.username, message.chat.id)
+    ):
+        bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
 
 
 bot.infinity_polling()

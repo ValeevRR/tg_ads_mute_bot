@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from src.db import (
+from db import (
     mute_user_db,
     unmute_user_db,
     get_chat_mute_usernames,

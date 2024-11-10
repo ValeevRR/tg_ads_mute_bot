@@ -31,7 +31,7 @@ def request_allowed_substr(message, callback):
     bot.register_next_step_handler(request_message, callback, message.text)
 
 
-@bot.message_handler(commands=["mute_test"])
+@bot.message_handler(commands=["mute"])
 def mute_user_handler(message):
     message = bot.send_message(message.chat.id, REQUEST_USERNAME)
     bot.register_next_step_handler(message, mute_user)

@@ -7,7 +7,7 @@ from db import (
     is_muted_user,
 )
 from const import REQUEST_USERNAME
-from src.helpers import (
+from helpers import (
     mute_user,
     unmute_user,
     is_allowed_message,

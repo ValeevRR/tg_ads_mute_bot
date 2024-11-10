@@ -6,7 +6,7 @@ from db import (
     create_db,
     is_muted_user,
 )
-from src.const import REQUEST_USERNAME
+from const import REQUEST_USERNAME
 from src.helpers import (
     mute_user,
     unmute_user,
